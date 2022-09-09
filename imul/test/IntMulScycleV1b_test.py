@@ -15,9 +15,9 @@ def test_basic( cmdline_opts ):
   run_test_vector_sim( IntMulScycleV1(), [
     ('in0 in1 out*'),
     [ 2,  2,  '?'  ],
-    [ 3,  2,   4   ],
-    [ 3,  3,   6   ],
-    [ 0,  0,   9   ],
+    [ 3,  2,   0   ],
+    [ 3,  3,   0   ],
+    [ 0,  0,   0   ],
   ], cmdline_opts )
 
 #-------------------------------------------------------------------------
@@ -28,7 +28,7 @@ def test_overflow( cmdline_opts ):
   run_test_vector_sim( IntMulScycleV1(), [
     ('in0         in1 out*'),
     [ 0x80000001, 2,  '?'  ],
-    [ 0xc0000002, 4,   2   ],
-    [ 0x00000000, 0,   8   ],
+    [ 0xc0000002, 4,   0   ],
+    [ 0x00000000, 0,   0   ],
   ], cmdline_opts )
 

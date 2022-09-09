@@ -54,13 +54,13 @@ def mk_omsg( a ):
 #-------------------------------------------------------------------------
 
 basic_msgs = [
-  mk_imsg(2,2), mk_omsg(4),
-  mk_imsg(3,3), mk_omsg(9),
+  mk_imsg(2,2), mk_omsg(0),
+  mk_imsg(3,3), mk_omsg(0),
 ]
 
 overflow_msgs = [
-  mk_imsg(0x80000001,2), mk_omsg(2),
-  mk_imsg(0xc0000002,4), mk_omsg(8),
+  mk_imsg(0x80000001,2), mk_omsg(0),
+  mk_imsg(0xc0000002,4), mk_omsg(0),
 ]
 
 random_msgs  = []

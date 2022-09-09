@@ -55,7 +55,7 @@ def mk_omsg( a ):
 def test_basic( cmdline_opts ):
 
   src_msgs  = [ mk_imsg(2,2), mk_imsg(3,3) ]
-  sink_msgs = [ mk_omsg(4),   mk_omsg(9)   ]
+  sink_msgs = [ mk_omsg(0),   mk_omsg(0)   ]
 
   th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
   run_sim( th, cmdline_opts, duts=['imul'] )
@@ -67,7 +67,7 @@ def test_basic( cmdline_opts ):
 def test_overflow( cmdline_opts ):
 
   src_msgs  = [ mk_imsg(0x80000001,2), mk_imsg(0xc0000002,4) ]
-  sink_msgs = [ mk_omsg(2),            mk_omsg(8)            ]
+  sink_msgs = [ mk_omsg(0),            mk_omsg(0)            ]
 
   th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
   run_sim( th, cmdline_opts, duts=['imul'] )

@@ -33,7 +33,7 @@ def test_basic():
   model.in0 @= 2
   model.in1 @= 2
   model.sim_tick()
-  assert model.out == 4
+  assert model.out == 0
 
   # Tick simulator three more cycles
 
@@ -67,7 +67,7 @@ def test_overflow():
   model.in0 @= 0x80000001
   model.in1 @= 2
   model.sim_tick()
-  assert model.out == 2
+  assert model.out == 0
 
   # Tick simulator three more cycles
 
