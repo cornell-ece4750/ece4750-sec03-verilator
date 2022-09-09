@@ -16,12 +16,12 @@ from imul.IntMulScycleV3 import IntMulScycleV3
 
 class TestHarness( Component ):
 
-  def construct( s, imul, src_msgs, sink_msgs ):
+  def construct( s, imul, imsgs, omsgs ):
 
     # Instantiate models
 
-    s.src  = StreamSourceFL( Bits64, src_msgs  )
-    s.sink = StreamSinkFL  ( Bits32, sink_msgs )
+    s.src  = StreamSourceFL( Bits64, imsgs )
+    s.sink = StreamSinkFL  ( Bits32, omsgs )
     s.imul = imul
 
     # Connect
@@ -52,10 +52,10 @@ def mk_omsg( a ):
 
 def test_basic( cmdline_opts ):
 
-  src_msgs  = [ mk_imsg(2,2), mk_imsg(3,3) ]
-  sink_msgs = [ mk_omsg(0),   mk_omsg(0)   ]
+  imsgs = [ mk_imsg(2,2), mk_imsg(3,3) ]
+  omsgs = [ mk_omsg(4),   mk_omsg(9)   ]
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
 #-------------------------------------------------------------------------
@@ -64,8 +64,8 @@ def test_basic( cmdline_opts ):
 
 def test_overflow( cmdline_opts ):
 
-  src_msgs  = [ mk_imsg(0x80000001,2), mk_imsg(0xc0000002,4) ]
-  sink_msgs = [ mk_omsg(0),            mk_omsg(0)            ]
+  imsgs = [ mk_imsg(0x80000001,2), mk_imsg(0xc0000002,4) ]
+  omsgs = [ mk_omsg(2),            mk_omsg(8)            ]
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs )
   run_sim( th, cmdline_opts, duts=['imul'] )

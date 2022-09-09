@@ -18,12 +18,12 @@ from imul.IntMulScycleV3 import IntMulScycleV3
 
 class TestHarness( Component ):
 
-  def construct( s, imul, src_msgs, sink_msgs, delay=0 ):
+  def construct( s, imul, imsgs, omsgs, delay=0 ):
 
     # Instantiate models
 
-    s.src  = StreamSourceFL( Bits64, src_msgs  )
-    s.sink = StreamSinkFL  ( Bits32, sink_msgs,
+    s.src  = StreamSourceFL( Bits64, imsgs )
+    s.sink = StreamSinkFL  ( Bits32, omsgs,
                              initial_delay=delay, interval_delay=delay )
     s.imul = imul
 
@@ -55,10 +55,10 @@ def mk_omsg( a ):
 
 def test_basic( cmdline_opts ):
 
-  src_msgs  = [ mk_imsg(2,2), mk_imsg(3,3) ]
-  sink_msgs = [ mk_omsg(0),   mk_omsg(0)   ]
+  imsgs = [ mk_imsg(2,2), mk_imsg(3,3) ]
+  omsgs = [ mk_omsg(4),   mk_omsg(9)   ]
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
 #-------------------------------------------------------------------------
@@ -67,10 +67,10 @@ def test_basic( cmdline_opts ):
 
 def test_overflow( cmdline_opts ):
 
-  src_msgs  = [ mk_imsg(0x80000001,2), mk_imsg(0xc0000002,4) ]
-  sink_msgs = [ mk_omsg(0),            mk_omsg(0)            ]
+  imsgs = [ mk_imsg(0x80000001,2), mk_imsg(0xc0000002,4) ]
+  omsgs = [ mk_omsg(2),            mk_omsg(8)            ]
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
 #-------------------------------------------------------------------------
@@ -79,16 +79,16 @@ def test_overflow( cmdline_opts ):
 
 def test_random( cmdline_opts ):
 
-  src_msgs  = []
-  sink_msgs = []
+  imsgs  = []
+  omsgs = []
 
   for i in range(10):
     a = randint(0,100)
     b = randint(0,100)
-    src_msgs.extend ([ mk_imsg(a,b) ])
-    sink_msgs.extend([ mk_omsg(a*b) ])
+    imsgs.extend([ mk_imsg(a,b) ])
+    omsgs.extend([ mk_omsg(a*b) ])
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
 #-------------------------------------------------------------------------
@@ -97,16 +97,16 @@ def test_random( cmdline_opts ):
 
 def test_random_delay1( cmdline_opts ):
 
-  src_msgs  = []
-  sink_msgs = []
+  imsgs = []
+  omsgs = []
 
   for i in range(10):
     a = randint(0,100)
     b = randint(0,100)
-    src_msgs.extend ([ mk_imsg(a,b) ])
-    sink_msgs.extend([ mk_omsg(a*b) ])
+    imsgs.extend([ mk_imsg(a,b) ])
+    omsgs.extend([ mk_omsg(a*b) ])
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs, 1 )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs, 1 )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
 #-------------------------------------------------------------------------
@@ -115,15 +115,15 @@ def test_random_delay1( cmdline_opts ):
 
 def test_random_delay3( cmdline_opts ):
 
-  src_msgs  = []
-  sink_msgs = []
+  imsgs = []
+  omsgs = []
 
   for i in range(10):
     a = randint(0,100)
     b = randint(0,100)
-    src_msgs.extend ([ mk_imsg(a,b) ])
-    sink_msgs.extend([ mk_omsg(a*b) ])
+    imsgs.extend([ mk_imsg(a,b) ])
+    omsgs.extend([ mk_omsg(a*b) ])
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs, 3 )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs, 3 )
   run_sim( th, cmdline_opts, duts=['imul'] )
 

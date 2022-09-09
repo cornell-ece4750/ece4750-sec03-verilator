@@ -18,12 +18,12 @@ from imul.IntMulScycleV3 import IntMulScycleV3
 
 class TestHarness( Component ):
 
-  def construct( s, imul, src_msgs, sink_msgs, delay=0 ):
+  def construct( s, imul, imsgs, omsgs, delay=0 ):
 
     # Instantiate models
 
-    s.src  = StreamSourceFL( Bits64, src_msgs  )
-    s.sink = StreamSinkFL  ( Bits32, sink_msgs,
+    s.src  = StreamSourceFL( Bits64, imsgs  )
+    s.sink = StreamSinkFL  ( Bits32, omsgs,
                              initial_delay=delay, interval_delay=delay )
     s.imul = imul
 
@@ -54,20 +54,20 @@ def mk_omsg( a ):
 #-------------------------------------------------------------------------
 
 basic_msgs = [
-  mk_imsg(2,2), mk_omsg(0),
-  mk_imsg(3,3), mk_omsg(0),
+  mk_imsg(2,2), mk_omsg(4),
+  mk_imsg(3,3), mk_omsg(9),
 ]
 
 overflow_msgs = [
-  mk_imsg(0x80000001,2), mk_omsg(0),
-  mk_imsg(0xc0000002,4), mk_omsg(0),
+  mk_imsg(0x80000001,2), mk_omsg(2),
+  mk_imsg(0xc0000002,4), mk_omsg(8),
 ]
 
 random_msgs  = []
 for i in range(10):
   a = randint(0,100)
   b = randint(0,100)
-  random_msgs.extend ([ mk_imsg(a,b), mk_omsg(a*b) ])
+  random_msgs.extend([ mk_imsg(a,b), mk_omsg(a*b) ])
 
 #-------------------------------------------------------------------------
 # Test Case Table
@@ -89,10 +89,10 @@ test_case_table = mk_test_case_table([
 @pytest.mark.parametrize( **test_case_table )
 def test( test_params, cmdline_opts ):
 
-  src_msgs  = test_params.msgs[::2]
-  sink_msgs = test_params.msgs[1::2]
-  delay     = test_params.delay
+  imsgs = test_params.msgs[::2]
+  omsgs = test_params.msgs[1::2]
+  delay = test_params.delay
 
-  th = TestHarness( IntMulScycleV3(), src_msgs, sink_msgs, delay )
+  th = TestHarness( IntMulScycleV3(), imsgs, omsgs, delay )
   run_sim( th, cmdline_opts, duts=['imul'] )
 
