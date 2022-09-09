@@ -1,5 +1,5 @@
 
-ECE 4750 Section 3: RTL Tesging with Python
+ECE 4750 Section 3: RTL Testing with Python
 ==========================================================================
 
  - Author: Christopher Batten
