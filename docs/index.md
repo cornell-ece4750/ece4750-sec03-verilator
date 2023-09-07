@@ -9,8 +9,9 @@ ECE 4750 Section 3: RTL Testing with Verilator
 **Table of Contents**
 
  - Overview of Testing Strategies
- - Testing with Verilator + gcov/lcov
  - Testing with Stream Sources and Sinks
+ - Testing with Verilator + gcov/lcov
+ - Examining Coverage Reports
  - Using Functional-Level Models
 
 This discussion section serves as gentle introduction to the basics of
