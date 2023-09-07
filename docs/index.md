@@ -96,10 +96,13 @@ on any of them, the corresponding plug-in should launch. You should now
 have a phenomenal 3-tile workflow set up! You can edit your Verilog
 code, verilate, and debug it, all in the same window.
 
+![](assets/fig/vscode.png)
+
+
 Ad-Hoc vs. Assertion Testing
 --------------------------------------------------------------------------
 
-We will start by testing the simple single-cycle adder we developed
+Now let's get back to testing the simple single-cycle adder we developed
 in last week's discussion:
 
 ![](assets/fig/adder.png)
