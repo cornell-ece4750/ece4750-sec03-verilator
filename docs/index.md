@@ -123,62 +123,9 @@ As a reminder, here is the interface for our latency-insensitive adder:
      output logic [31:0] ostream_msg
     );
 
-Our single-cycle multiplier takes two 32-bit input values and produces a
-32-bit output value. Let's use the same ad-hoc test we used last week to
-test this multiplier. Start by reviewing the Python test bench located in
-`imul/imul-v1-adhoc-test.py`:
+- Again, anyone care to explain how this works?
 
-    from sys import argv
 
-    from pymtl3  import *
-    from pymtl3.passes.backends.verilog import *
-
-    from IntMulScycleV1 import IntMulScycleV1
-
-    # Get list of input values from command line
-
-    in0_values = [ int(x,0) for x in argv[1::2] ]
-    in1_values = [ int(x,0) for x in argv[2::2] ]
-
-    # Create and elaborate the model
-
-    model = IntMulScycleV1()
-    model.elaborate()
-
-    # Apply the Verilog import passes and the default pass group
-
-    model.apply( VerilogPlaceholderPass() )
-    model = VerilogTranslationImportPass()( model )
-    model.apply( DefaultPassGroup(linetrace=True,textwave=True,vcdwave="imul-v1-adhoc-test") )
-
-    # Reset simulator
-
-    model.sim_reset()
-
-    # Apply input values and display output values
-
-    for in0_value,in1_value in zip(in0_values,in1_values):
-
-      # Write input value to input port
-
-      model.in0 @= in0_value
-      model.in1 @= in1_value
-      model.sim_eval_combinational()
-
-      # Tick simulator one cycle
-
-      model.sim_tick()
-
-    # Tick simulator three more cycles and print text wave
-
-    model.sim_tick()
-    model.sim_tick()
-    model.sim_tick()
-    model.print_textwave()
-
-The test bench gets some input values from the command line, instantiates
-the design under test, applies some PyMLT3 passes, and then runs a
-simulation by setting the input values and displaying the output value.
 Let's run this ad-hoc test as follows:
 
     % cd $TOPDIR/build
@@ -192,13 +139,13 @@ overflow:
 
 In _ad-hoc testing_, we try different inputs and inspect the output
 manually to see if the design under test produces the correct result.
-This “verification by inspection” is error prone and not reproducible. If
+This “verification by inspection” is error-prone and not reproducible. If
 you later make a change to your design, you would have to take another
 look at the debug output and/or waveforms to ensure that your design
 still works. If another member of your group wants to understand your
 design and verify that it is working, he or she would also need to take a
 look at the debug output and/or waveforms. Ad-hoc testing is usually
-verbose, which makes it error prone and more cumbersome to write tests.
+verbose, which makes it error-prone and more cumbersome to write tests.
 Ad-hoc testing is difficult for others to read and understand since by
 definition it is ad-hoc. Ad-hoc testing does not use any kind of standard
 test output, and does not provide support for controlling the amount of
