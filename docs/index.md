@@ -2,21 +2,20 @@
 ECE 4750 Section 3: RTL Testing with Python
 ==========================================================================
 
- - Author: Christopher Batten
- - Date: September 9, 2022
+ - Author: Cecilio C. Tamarit
+ - Date: September 7, 2023
+ - Inspired by previous ECE 4750 material
 
 **Table of Contents**
 
  - Overview of Testing Strategies
- - Ad-Hoc vs. Assertion Testing
- - Testing with pytest
- - Testing with Test Vectors
+ - Testing with Verilator + gcov/lcov
  - Testing with Stream Sources and Sinks
  - Using Functional-Level Models
 
 This discussion section serves as gentle introduction to the basics of
-RTL testing using Python. We will start by discussing various different
-kinds of testing strategies including:
+RTL testing using Verilator and gcov/lcov. We will also tackle concepts
+such as:
 
  - Ad-Hoc vs. Assertion Testing
  - Directed vs. Random Testing
@@ -25,23 +24,34 @@ kinds of testing strategies including:
  - Unit vs. Integration Testing
  - Reference Models
 
-After this discussion you should log into the `ecelinux` servers using
-the remote access option of your choice and then source the setup script.
+Start by logging into the `ecelinux` servers using the remote access option 
+of your choice and then source the setup script. We can then reuse the
+setup from last week. Make sure you `make clean` if your directory from last 
+week already exists:
+
+Make sure you `make clean` if your directory from last week already exists:
+    
+    % cd $HOME/ece4750/sec/sec02
+    % make clean
+
+If it _doesn't_ exist, we can set it up again:
 
     % source setup-ece4750.sh
-    % mkdir -p $HOME/ece4750
-    % cd $HOME/ece4750
-    % git clone git@github.com:cornell-ece4750/ece4750-sec03-pymtl sec03
-    % cd sec03
+    % mkdir -p $HOME/ece4750/sec
+    % cd $HOME/ece4750/sec
     % TOPDIR=$PWD
-    % mkdir $TOPDIR/build
+    % wget https://github.com/cornell-ece4750/ece4750-sec02-verilog/raw/m3/docs/sec02.tar.gz
+    % tar xvf sec02.tar.gz
+    % rm sec02.tar.gz
+    % make setup
+    % cd $HOME/ece4750/sec/sec02
+    
 
 Ad-Hoc vs. Assertion Testing
 --------------------------------------------------------------------------
 
-We will start by testing the simple single-cycle multiplier, we developed
-in last week's discussion section which does include any kind of flow
-control (i.e., no valid/ready signals):
+We will start by testing the simple single-cycle adder we developed
+in last week's discussion:
 
 ![](assets/fig/imul-v1.png)
 
