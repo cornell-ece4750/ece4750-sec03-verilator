@@ -53,18 +53,22 @@ Ad-Hoc vs. Assertion Testing
 We will start by testing the simple single-cycle adder we developed
 in last week's discussion:
 
-![](assets/fig/imul-v1.png)
+![](assets/fig/adder.png)
 
-As a reminder, here is the interface for our single-cycle multiplier.
+As a reminder, here is the interface for our latency-insensitive adder:
 
-    module imul_IntMulScycleV1
+    module sec02_Adder
     (
-      input  logic        clk,
-      input  logic        reset,
-
-      input  logic [31:0] in0,
-      input  logic [31:0] in1,
-      output logic [31:0] out
+     input  logic        clk,
+     input  logic        reset,
+       
+     input  logic        istream_val,
+     output logic        istream_rdy,
+     input  logic [63:0] istream_msg,
+       
+     output logic        ostream_val,
+     input  logic        ostream_rdy,
+     output logic [31:0] ostream_msg
     );
 
 Our single-cycle multiplier takes two 32-bit input values and produces a
