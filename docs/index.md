@@ -45,8 +45,56 @@ If it _doesn't_ exist, we can set it up again:
     % tar xvf sec02.tar.gz
     % rm sec02.tar.gz
     % make setup
-    % cd $HOME/ece4750/sec/sec02
-    
+    % cd $TOPDIR/sec02
+
+
+### Pro tip: VCD format and waveform visualization in VSCode
+
+While GTKWave suits the needs of this class, VSCode users
+will benefit from storing waveforms in the VCD format (as
+opposed to FST). Several VCD visualization plug-ins exist
+and can be installed right from VSCode, such as the one shown
+below. This circumvents the need to resort to X11 or X2Go.
+
+![](assets/fig/vsplugins.png)
+
+However, we still need to modify `$TOPDIR/sec02/verilator.cpp`
+so that we generate VCD files instead of FST files in the `waves`
+folder. First, by including the right header at the top:
+
+    ...
+    #include "verilated_vcd_c.h"
+    ...
+
+Then, by modifying lines ~77-92 as follows:
+
+    Verilated::debug(0);
+    Verilated::randReset(2);
+    Verilated::traceEverOn(true);
+    Verilated::commandArgs(argc, argv);
+    Verilated::mkdir("logs");
+    const std::unique_ptr<VerilatedContext> contextp{new VerilatedContext};
+    Verilated::traceEverOn(true);
+    Vtop* top = new Vtop{contextp.get(), "TOP"};  // Or use a const unique_ptr, or the VL_UNIQUE_PTR wrapper
+      //svSetScope (svGetScopeFromName("Vtop.v"));
+    VerilatedVcdC* tfp = new VerilatedVcdC;
+    Verilated::traceEverOn(true);
+    if(waves){
+        top->trace(tfp, 99);  // Trace 99 levels of hierarchy
+        Verilated::mkdir("waves");
+        tfp->open((std::string("waves/")+outname +"waves.vcd").c_str());
+    }
+
+Lastly, defying course policy, edit the Makefile at 
+`$TOPDIR/sec02/Makefile` so that line 88 becomes:
+
+    VERILATOR_FLAGS += --trace
+
+If you proceed to cleaning, regenerating, and running the testbench,
+you will now find the VCD files in the `waves` folder. If you click
+on any of them, the corresponding plug-in should launch. You should now
+have a phenomenal 3-tile workflow set up! You can edit your Verilog
+code, verilate, and debug it, all in the same window.
 
 Ad-Hoc vs. Assertion Testing
 --------------------------------------------------------------------------
