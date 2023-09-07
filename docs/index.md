@@ -66,7 +66,7 @@ folder. First, by including the right header at the top:
     #include "verilated_vcd_c.h"
     ...
 
-Then, by modifying lines ~77-92 as follows:
+Then, by modifying lines ~77-92 as follows to make use of the `VerilatedVcdC` class:
 
     Verilated::debug(0);
     Verilated::randReset(2);
