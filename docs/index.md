@@ -10,7 +10,7 @@ ECE 4750 Section 3: RTL Testing with Verilator
 
  - VCD format and waveform visualization in VSCode
  - Overview of Testing Strategies
- - Testing with Stream Sources and Sinks
+ - (Review: Testing with Stream Sources and Sinks)
  - Generating Coverage Reports with gcov/lcov
 
 This discussion section serves as gentle introduction to the basics of
@@ -156,146 +156,27 @@ To discuss in class: testing spectra
  - Reference Models
 
 
-Testing with pytest
+Generating Coverage Reports with gcov/lcov
 --------------------------------------------------------------------------
 
-In this course, we will be using the powerful `pytest` unit testing
-framework. The `pytest` framework is popular in the Python programming
-community with many features that make it well-suited for test-driven
-hardware development including: no-boilerplate testing with the standard
-assert statement; automatic test discovery; helpful traceback and
-failing assertion reporting; standard output capture; sophisticated
-parameterized testing; test marking for skipping certain tests;
-distributed testing; and many third-party plugins. More information is
-available here:
+To discuss in class:
 
- - <http://www.pytest.org>
+- Drawing from your own experience with Lab 1, define "coverage."
+- Why is test coverage such a big deal?
 
-It is pretty easy to adapt the assertion test script we already have to
-make it suitable for use with `pytest`. Usually we like to keep all of
-our tests in a dedicated `test` subdirectory. Take a look at the test
-script `imul/test/IntMulScycleV1a_test.py`. It looks exactly like our
-previous assertion test script with two changes:
+In our Makefile, we have included a series of commands that will generate
+coverage reports _after your tests have been run_. This last part is important
+to stress, and in fact we recommend that you `make clean` and rerun the
+tests you are interested in before proceeding with generating the report. Not
+cleaning can result in stale and essentially incorrect reports.
+For our example, we would generate the report as follows:
 
- - we pass in `cmdline_opts` to each test case function
- - we do not need to explicitly call the test case functions at the bottom of the script
+    % make clean
+    % make tb_Adder_RandDelay.v DESIGN=Adder
+    % make coverage-report
 
-Let's use `pytest` to run this test:
+This will populate your `logs` folder...
 
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1a_test.py
-
-You can see that `pytest` has automatically discovered the two test
-cases; `pytest` will assume any function that starts with the `test_`
-prefix is a test case. The test cases will fail since we have not
-specified the correct expected values. We can use the `-v` command line
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1a_test.py -v
-
-We can then "zoom in" on the first test case using the `-k` command line
-option to run just that first test case:
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1a_test.py -v -k test_basic
-
-Then we can use the `-s` option to display the line trace and the
-`--dump-vcd` option to dump the VCD file.
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1a_test.py -v -k test_basic -s --dump-vcd
-
-Modify the test script to have the correct expected values for both test
-cases and then rerun the test using `pytest`.
-
-Testing with Test Vectors
---------------------------------------------------------------------------
-
-Our testing so far requires quite a bit of boilerplate code. Every test
-case must construct a model, elaborate that model, apply PyMTL3 passes,
-and reset the simulator. For every cycle, the test case must set the
-inputs, tick the simulator, and check the outputs. We can use the power
-of Python to encapsulate much of this common functionality into a library
-to simplify testing. PyMTL3 provides a `run_test_vector_sim` function
-that makes it easy to write these kind of cycle-by-cycle tests where we
-want to explicitly set inputs and check outputs every cycle. Take a look
-at the test script `imul/test/IntMulScycleV1b_test.py`.
-
-    def test_basic( cmdline_opts ):
-      run_test_vector_sim( IntMulScycleV1(), [
-        ('in0 in1 out*'),
-        [ 2,  2,  '?'  ],
-        [ 3,  2,   0   ],
-        [ 3,  3,   0   ],
-        [ 0,  0,   0   ],
-      ], cmdline_opts )
-
-    def test_overflow( cmdline_opts ):
-      run_test_vector_sim( IntMulScycleV1(), [
-        ('in0         in1 out*'),
-        [ 0x80000001, 2,  '?'  ],
-        [ 0xc0000002, 4,   0   ],
-        [ 0x00000000, 0,   0   ],
-      ], cmdline_opts )
-
-The `run_test_vector_sim` takes three arguments: a design under test, the
-test vector table, and the command line options. The first row in the
-test vector table specifies the names of the input and output ports.
-Output ports need to be indicated by adding a `*` suffix. The remaining
-rows in the test vector table specify the inputs and the correct outputs
-for every cycle. We can indicate we don't care about an output on a given
-cycle with `?`. Notice how Python can make things very compact while at
-the same time very readable. Let's use `pytest` to run this test:
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1b_test.py -s -v
-
-The test cases will fail since we have not specified the correct expected
-values. Modify the test script to have the correct expected values for
-both test cases and then rerun the test using `pytest`. Use the `-v` and
-`-s` options and notice that the line trace roughly corresponds to the
-test vector table.
-
-But wait there is more! We can use the `pytest.mark.parametrize`
-decorator to parameterize a single test case over many different
-parameters. In other words, instead of explicitly defining two test case
-functions, we can _generate_ two test case functions from a single
-specification. Take a look at the test script
-`imul/test/IntMulScycleV1c_test.py`.
-
-    basic_test_vectors = [
-      ('in0 in1 out*'),
-      [ 2,  2,  '?'  ],
-      [ 3,  2,   0   ],
-      [ 3,  3,   0   ],
-      [ 0,  0,   0   ],
-    ]
-
-    overflow_test_vectors = [
-      ('in0         in1 out*'),
-      [ 0x80000001, 2,  '?'  ],
-      [ 0xc0000002, 4,   0   ],
-      [ 0x00000000, 0,   0   ],
-    ]
-
-    @pytest.mark.parametrize( "test_vectors", [
-      basic_test_vectors,
-      overflow_test_vectors
-    ])
-    def test_overflow( test_vectors, cmdline_opts ):
-        run_test_vector_sim( IntMulScycleV1(), test_vectors, cmdline_opts )
-
-Here we define test vector tables and then we use those test vector
-tables in the `pytest.mark.parametrize` decorator. In this specific
-example it does not save too much boiler plate, but we will see in the
-next section how this is a very powerful way to generate test cases.
-Modify the test script to have the correct expected values for both test
-cases and then rerun the test using `pytest`. Use the `-v` and `-s`
-options and notice that the output is basically the same as if we have
-explicitly defined two test cases.
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulScycleV1c_test.py -s -v
 
 Testing with Stream Sources and Sinks
 --------------------------------------------------------------------------
@@ -506,63 +387,4 @@ Add a new row to the test case table that reuses the random messages but
 with a delay of 10. Rerun the test case and look at the line trace to
 verify the longer delays.
 
-Using Functional-Level Models
---------------------------------------------------------------------------
-
-One challenge with our testing strategy so far, is that when there is a
-test failure we often don't know if the issue is an incorrect test case
-or an incorrect design. It can be useful to have functional-level (FL)
-model (also called a golden reference model) of our design. We can then
-write all of our tests and ensure they pass on the FL model before
-running those tests on our RTL design. We could also use our FL model in
-random testing by sending the same inputs to both the FL and RTL models
-and ensuring the outputs are equal.
-
-FL models can be written in pure Python using PyMTL3. Here is a FL model
-for our single-cycle multiplier.
-
-    class IntMulFL( Component ):
-      def construct( s ):
-
-        # Interface
-
-        s.istream = IStreamIfc( Bits64 )
-        s.ostream = OStreamIfc( Bits32 )
-
-        # Queue Adapters
-
-        s.istream_q = IStreamDeqAdapterFL( Bits64 )
-        s.ostream_q = OStreamEnqAdapterFL( Bits32 )
-
-        s.istream //= s.istream_q.istream
-        s.ostream //= s.ostream_q.ostream
-
-        # FL block
-
-        @update_once
-        def block():
-          if s.istream_q.deq.rdy() and s.ostream_q.enq.rdy():
-            msg = s.istream_q.deq()
-            s.ostream_q.enq( msg[32:64] * msg[0:32] )
-
-Our FL model has the exact same interface as the RTL model. Normally, an
-FL model just captures the _functional_ behavior of a model and does
-_not_ attempt to capture any of the timing behavior. The above FL model
-uses a combination of adapters and special PyMTL3 modeling constructs to
-be able to express the function of our multiplier at a high level. We can
-run all of our tests on our FL model like this:
-
-    % cd $TOPDIR/build
-    % pytest ../imul/test/IntMulFL_test.py -s -v
-
-Since the FL model and RTL model have the exact same interface, it is
-possible with clever Python programming to reuse the exact same tests
-cases across both models. This means we can get all of our tests cases
-working on the FL model, then directly reuse those test cases on the RTL
-model, and be relatively confident that the test cases are correct.
-
-Note that you can run all of the tests in the entire project like this:
-
-    % cd $TOPDIR/build
-    % pytest ../imul
 
