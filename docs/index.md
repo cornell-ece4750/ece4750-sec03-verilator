@@ -8,22 +8,13 @@ ECE 4750 Section 3: RTL Testing with Verilator
 
 **Table of Contents**
 
+ - VCD format and waveform visualization in VSCode
  - Overview of Testing Strategies
  - Testing with Stream Sources and Sinks
- - Testing with Verilator + gcov/lcov
- - Examining Coverage Reports
- - Using Functional-Level Models
+ - Generating Coverage Reports with gcov/lcov
 
 This discussion section serves as gentle introduction to the basics of
-RTL testing using Verilator and gcov/lcov. We will also tackle concepts
-such as:
-
- - Ad-Hoc vs. Assertion Testing
- - Directed vs. Random Testing
- - Black-Box vs. White-Box Testing
- - Value vs. Delay Testing
- - Unit vs. Integration Testing
- - Reference Models
+RTL testing using Verilator and gcov/lcov. 
 
 Start by logging into the `ecelinux` servers using the remote access option 
 of your choice and then source the setup script. We can then reuse the
@@ -48,7 +39,7 @@ If it _doesn't_ exist, we can set it up again:
     % cd $TOPDIR/sec02
 
 
-### Pro tip: VCD format and waveform visualization in VSCode
+## Pro tip: VCD format and waveform visualization in VSCode
 
 While GTKWave suits the needs of this class, VSCode users
 will benefit from storing waveforms in the VCD format (as
@@ -99,7 +90,7 @@ code, verilate, and debug it, all in the same window.
 ![](assets/fig/vscode.png)
 
 
-Ad-Hoc vs. Assertion Testing
+Overview of Testing Strategies
 --------------------------------------------------------------------------
 
 Now let's get back to testing the simple single-cycle adder we developed
@@ -125,81 +116,45 @@ As a reminder, here is the interface for our latency-insensitive adder:
 
 - Again, anyone care to explain how this works?
 
+In tb_Adder.v we had set up the following sample test cases:
 
-Let's run this ad-hoc test as follows:
+    test_case( { 32'd1, 32'd1 },  32'd2 );
+    test_case( { 32'd2, 32'd2 },  32'd4 );
+    test_case( { 32'd4, 32'd5 },  32'd9 );
 
-    % cd $TOPDIR/build
-    % python ../imul/imul-v1-adhoc-test.py 2 2 3 3
+As a reminder, we can then run these tests as follows:
+
+    % cd $TOPDIR/sec02
+    % make tb_Adder_RandDelay.v DESIGN=Adder
 
 Experiment with different input values. Try large values that result in
 overflow:
 
-    % cd $TOPDIR/build
-    % python ../imul/imul-v1-adhoc-test.py 70000 70000
+    test_case( { 32'd1, 32'd1 },  32'd2 );
+    test_case( { 32'd2, 32'd2 },  32'd4 );
+    test_case( { 32'd4294967295, 32'd1 },  32'd4294967296 );
 
-In _ad-hoc testing_, we try different inputs and inspect the output
-manually to see if the design under test produces the correct result.
-This “verification by inspection” is error-prone and not reproducible. If
-you later make a change to your design, you would have to take another
-look at the debug output and/or waveforms to ensure that your design
-still works. If another member of your group wants to understand your
-design and verify that it is working, he or she would also need to take a
-look at the debug output and/or waveforms. Ad-hoc testing is usually
-verbose, which makes it error-prone and more cumbersome to write tests.
-Ad-hoc testing is difficult for others to read and understand since by
-definition it is ad-hoc. Ad-hoc testing does not use any kind of standard
-test output, and does not provide support for controlling the amount of
-test output. While using ad-hoc testing might be feasible for very simple
-designs, it is obviously not a scalable approach when building the more
-complicated designs we will tackle in this course.
+What we have been doing is a form of _assertion testing_ where we 
+explicitly define input vectors and expected outputs so that the
+testbench systematically determines whether any given test passes or fails.
+This is as opposed to _ad-hoc testing_, in which case we also specify
+the inputs, but then manually inspect the output (e.g. traces or waves)
+to determine whether they reflect the expected behavior. The latter approach
+is only truly feasible in the context of small modules, or as you know,
+for debugging, but as designs increase in complexity it is of the utmost
+importance that an automated testing process be in place. Being able to
+replicate the original testing strategy will save us a significant amount 
+of time if we expect this design to be modified (by others) in the future. 
 
-The first step to improving our testing strategy is to use _assertion
-testing_ where we explicitly write assertions that must be true for the
-test to pass. This way we have made the checking for the correct results
-systematic and automatic. Take a look at the simple Python test bench for
-assertion testing located in `imul/imul-v1-assertion-test.py`:
+To discuss in class: testing spectra
 
-    def test_basic():
+ - Ad-Hoc vs. Assertion Testing
+ - Directed vs. Random Testing
+ - Black-Box vs. White-Box Testing
+ - Value vs. Delay Testing
+ - Unit vs. Integration Testing
+ - Reference Models
 
-      ... create and elaborate model ...
-      ... apply Verilog import passes and the default pass group ...
-
-      model.sim_reset()
-
-      model.in0 @= 2
-      model.in1 @= 2
-      model.sim_tick()
-      assert model.out == 0
-
-    def test_basic():
-
-      ... create and elaborate model ...
-      ... apply Verilog import passes and the default pass group ...
-
-      model.sim_reset()
-
-      model.in0 @= 0x80000001
-      model.in1 @= 2
-      model.sim_tick()
-      assert model.out == 0
-
-    test_basic()
-    test_overflow()
-
-We have structured our assertion testing into a set of _test cases_. Each
-test case is implemented as a Python function named with the prefix
-`test_`. Each test case creates and elaborates the design under test,
-applies appropriate passes, and resets the model. The test case then sets
-the inputs to the model, ticks the simulator, and asserts that the output
-of the model match the expected value. We explicitly call both test case
-functions at the end of the script. Let's run this assertion test:
-
-    % cd $TOPDIR/build
-    % python ../imul/imul-v1-assertion-test.py
-
-The first test case will fail since we have not specified the correct
-expected value. Modify the assertion test script to have the correct
-expected values for both test cases and then rerun the assertion test.
 
 Testing with pytest
 --------------------------------------------------------------------------
