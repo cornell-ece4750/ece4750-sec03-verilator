@@ -176,7 +176,7 @@ coverage information will only be obtained if we pass a valid input to the
 generate the report as follows:
 
     % make clean
-    % make tb_Adder_RandDelay.v DESIGN=Adder COVERAGE=coverage
+    % make tb_Adder_RandDelay.v DESIGN=Adder RUN_ARG=--trace COVERAGE=coverage
     % make coverage-report
 
 Here, `COVERAGE=coverage` can be replaced with `COVERAGE=coverage-line` or
