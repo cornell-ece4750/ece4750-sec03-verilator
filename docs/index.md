@@ -87,6 +87,8 @@ on any of them, the corresponding plug-in should launch. You should now
 have a phenomenal 3-tile workflow set up! You can edit your Verilog
 code, verilate, and debug it, all in the same window.
 
+    % make tb_Adder_RandDelay.v DESIGN=Adder RUN_ARG=--trace
+
 ![](assets/fig/vscode.png)
 
 
