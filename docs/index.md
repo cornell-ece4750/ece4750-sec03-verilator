@@ -168,14 +168,23 @@ In our Makefile, we have included a series of commands that will generate
 coverage reports _after your tests have been run_. This last part is important
 to stress, and in fact we recommend that you `make clean` and rerun the
 tests you are interested in before proceeding with generating the report. Not
-cleaning can result in stale and essentially incorrect reports.
-For our example, we would generate the report as follows:
+cleaning can result in stale and essentially incorrect reports. Also note that
+coverage information will only be obtained if we pass a valid input to the
+`COVERAGE` parameter. For our previous example, we would dump coverage information and 
+generate the report as follows:
 
     % make clean
-    % make tb_Adder_RandDelay.v DESIGN=Adder
+    % make tb_Adder_RandDelay.v DESIGN=Adder COVERAGE=coverage
     % make coverage-report
 
-This will populate your `logs` folder...
+Here, `COVERAGE=coverage` can be replaced with `COVERAGE=coverage-line` or
+`COVERAGE=coverage-toggle`.
+
+To review in class:
+
+- What was the difference between line and toggle coverage?
+
+Running the aforementioned commands will populate your `logs` folder...
 
 
 Testing with Stream Sources and Sinks
